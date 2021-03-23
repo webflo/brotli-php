@@ -1,8 +1,6 @@
-[![Build Status](https://travis-ci.org/vdechenaux/brotli-php.svg?branch=master)](https://travis-ci.org/vdechenaux/brotli-php)
+[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/nlemoine/brotli-php/Tests?style=flat-square)](https://github.com/nlemoine/brotli-php/actions/workflows/tests.yml?query=branch%3Amaster+workflow%3ATests)
 
-# Features
-
-This library adds Brotli support to PHP (>= 7.1)
+This library adds Brotli support to PHP (^7.4 || ^8.0). Batteries included.
 
 ```php
 function brotli_compress(string $data, int $quality = 11): string
@@ -10,45 +8,43 @@ function brotli_compress(string $data, int $quality = 11): string
 function brotli_uncompress(string $data): string
 ```
 
-# Installation
+It is a fork of [vdechenaux/brotli-php](https://github.com/vdechenaux/brotli-php). Main differences:
 
+- avoid usage of `ob_start` in [`\Symfony\Component\Process\Process`](https://github.com/symfony/process/blob/b8d6eff26e48187fed15970799f4b605fa7242e4/Process.php#L1383-L1386) so you can use it inside an `ob_start` callback.
+- comes with prebuilt binaries and automatic system guessing
 
-## Library
-```
-$ composer require vdechenaux/brotli
-```
-
-You are almost done ! **Read the next section to complete the setup.**
-
-## Binary
-This command will only install the PHP code, but a binary file is also needed. 
-This binary is provided by 2 packages, depending of your environment:
-
-- Linux AMD64
-```
-$ composer require vdechenaux/brotli-bin-amd64
-```
-
-- Linux i386
-```
-$ composer require vdechenaux/brotli-bin-i386
-```
-
-The binary will be automatically used by this library.
-You don't need to configure something after binary installation.
-
-### Using apt
-
-You can use Brotli binary from `apt` if you are using:
-- Ubuntu >= xenial (16.04)
-- Debian >= stretch (9)
+## Installation
 
 ```
-$ apt install brotli 
+$ composer require hellonico/brotli
 ```
 
-### Using Homebrew
+## Binaries
+
+### `brotli` is not available on your system/server
+
+Prebuilt binaries included for the following systems:
+
+- Linux (x86_64/i386)
+- Mac OS
+- Windows
+
+### `brotli` is available on your system/server
+
+If `brotli` is available on your server, you set its path using:
 
 ```
-$ brew install brotli 
+\HelloNico\Brotli\Brotli::setBinaryPath('brotli');
+```
+
+or
+
+```
+\HelloNico\Brotli\Brotli::setBinaryPath('/some/dir/brotli');
+```
+
+## Tests
+
+```
+composer test
 ```

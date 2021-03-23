@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
-use VDX\Brotli\Brotli;
+use HelloNico\Brotli\Brotli;
 
 final class BrotliTest extends TestCase
 {
@@ -52,12 +52,11 @@ final class BrotliTest extends TestCase
         ];
     }
 
-    /**
-     * @expectedException \VDX\Brotli\Exception\CorruptInputException
-     * @expectedExceptionMessage Input data is not valid Brotli.
-     */
     public function test decode non brotli data()
     {
+        $this->expectException(\HelloNico\Brotli\Exception\CorruptInputException::class);
+        $this->expectExceptionMessage('Input data is not valid Brotli.');
+
         Brotli::uncompress('this is not brotli');
     }
 
@@ -67,13 +66,14 @@ final class BrotliTest extends TestCase
     }
 
     /**
-     * @expectedException \VDX\Brotli\Exception\InvalidQualityException
      * @dataProvider invalidQualityDataProvider
      */
     public function test invalid quality(int $quality)
     {
-        self::expectExceptionMessage('The quality value is invalid. Must be between 0 and 11, '.$quality.' given.');
+        $this->expectException(\HelloNico\Brotli\Exception\InvalidQualityException::class);
+        $this->expectExceptionMessageMatches('#^The quality value is invalid#');
 
+        self::expectExceptionMessage('The quality value is invalid. Must be between 0 and 11, '.$quality.' given.');
         Brotli::compress('hello', $quality);
     }
 

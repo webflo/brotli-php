@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace VDX\Brotli\Exception;
+namespace HelloNico\Brotli\Exception;
 
 use Symfony\Component\Process\Exception\RuntimeException;
 

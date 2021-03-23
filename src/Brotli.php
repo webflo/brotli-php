@@ -1,21 +1,20 @@
 <?php
 declare(strict_types=1);
 
-namespace VDX\Brotli;
+namespace HelloNico\Brotli;
 
 use Symfony\Component\Process\Exception\ExceptionInterface;
 use Symfony\Component\Process\Exception\ProcessFailedException;
-use Symfony\Component\Process\Process;
-use VDX\Brotli\Exception\BrotliException;
-use VDX\Brotli\Exception\CorruptInputException;
-use VDX\Brotli\Exception\InvalidQualityException;
+use HelloNico\Brotli\Exception\BrotliException;
+use HelloNico\Brotli\Exception\CorruptInputException;
+use HelloNico\Brotli\Exception\InvalidQualityException;
+use loophp\phposinfo\Enum\FamilyName;
+use loophp\phposinfo\OsInfo;
 
 final class Brotli
 {
-    /**
-     * @var string
-     */
-    public static $binaryPath = 'brotli';
+    public static $binaryPath;
+    private static $binaryName = 'brotli';
 
     /**
      * @param string $binaryPath By default, the "brotli" binary in the OS Path is used. You can change this behavior.
@@ -54,6 +53,14 @@ final class Brotli
 
     private static function runBinary(array $arguments, string $stdin): string
     {
+        if (null === self::$binaryPath) {
+            try {
+                self::setBinaryPath(self::getPackageBinaryPath());
+            } catch (\Exception $exception) {
+                // Fallback to system brotli if it exists
+            }
+        }
+
         array_unshift($arguments, self::$binaryPath);
         $proc = new Process($arguments, null, null, $stdin);
 
@@ -68,5 +75,38 @@ final class Brotli
         }
 
         return $proc->getOutput();
+    }
+
+    /**
+     * Get binary path
+     *
+     * @throws Exception
+     * @return string
+     */
+    public static function getPackageBinaryPath()
+    {
+        if (null !== self::$binaryPath) {
+            return self::$binaryPath;
+        }
+
+        $binaryPath = [dirname(__DIR__), 'bin'];
+
+        $arch = strtolower(OsInfo::arch());
+
+        if (OsInfo::isFamily(FamilyName::LINUX)) {
+            array_push($binaryPath, 'linux', $arch, self::$binaryName);
+        } elseif (OsInfo::isFamily(FamilyName::DARWIN)) {
+            array_push($binaryPath, 'osx', $arch, self::$binaryName);
+        } elseif (OsInfo::isFamily(FamilyName::WINDOWS)) {
+            array_push($binaryPath, 'windows', $arch, self::$binaryName.'.exe');
+        }
+
+        $binaryPath = implode(DIRECTORY_SEPARATOR, $binaryPath);
+
+        if (!is_file($binaryPath)) {
+            throw new \Exception("No binary available for your system");
+        }
+
+        return self::$binaryPath = $binaryPath;
     }
 }
