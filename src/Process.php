@@ -2,6 +2,9 @@
 
 namespace HelloNico\Brotli;
 
+use Symfony\Component\Process\PhpProcess;
+use Symfony\Component\Process\Exception\ProcessFailedException;
+
 class Process extends \Symfony\Component\Process\Process
 {
     private static $sigchild;
@@ -21,6 +24,17 @@ class Process extends \Symfony\Component\Process\Process
             return self::$sigchild = false;
         }
 
-        return self::$sigchild = false !== strpos(shell_exec('php -i'), '--enable-sigchild');
+        $process = new PhpProcess(<<<EOF
+            <?php phpinfo(\INFO_GENERAL); ?>
+        EOF
+    );
+
+        try {
+            $process->mustRun();
+        } catch (ProcessFailedException $exception) {
+            throw $exception;
+        }
+
+        return self::$sigchild = false !== strpos($process->getOutput(), '--enable-sigchild');
     }
 }
